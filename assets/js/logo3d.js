@@ -11,7 +11,11 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
 function webglAvailable() {
   try {
     const c = document.createElement('canvas');
-    return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
+    const gl = window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl'));
+    // release the probe context right away, so the page holds only the one the scene uses
+    const lose = gl && gl.getExtension('WEBGL_lose_context');
+    if (lose) lose.loseContext();
+    return !!gl;
   } catch (e) {
     return false;
   }

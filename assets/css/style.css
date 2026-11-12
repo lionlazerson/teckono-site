@@ -872,3 +872,52 @@ button.chat-btn { width: 100%; background: transparent; font-family: inherit; te
   .chat-fab span { display: none; }
   .chat-panel { right: 0; bottom: 0; left: 0; width: auto; border-radius: 18px 18px 0 0; max-height: 86vh; padding: 20px 18px calc(20px + env(safe-area-inset-bottom, 0px)); }
 }
+
+/* Wide screens (Lion, v53): the page grows with the window instead of sitting in a 1240px column.
+   --kw (width steps) sets the column width; --k (steps by width AND height, so the hero still fits the
+   first screen with its pillars) scales the root font-size, and with it every rem size, plus the fixed
+   pixel sizes listed below. Up to 1499px wide nothing changes. */
+@media (min-width: 1500px) { :root { --kw: 1.08; } }
+@media (min-width: 1680px) { :root { --kw: 1.16; } }
+@media (min-width: 1860px) { :root { --kw: 1.26; } }
+@media (min-width: 2100px) { :root { --kw: 1.38; } }
+@media (min-width: 2400px) { :root { --kw: 1.54; } }
+@media (min-width: 2800px) { :root { --kw: 1.74; } }
+@media (min-width: 3400px) { :root { --kw: 2.1; } }
+@media (min-width: 1500px) { :root { --k: 1; } }
+@media (min-width: 1500px) and (min-height: 1020px) { :root { --k: 1.08; } }
+@media (min-width: 1680px) and (min-height: 1100px) { :root { --k: 1.16; } }
+@media (min-width: 1860px) and (min-height: 1190px) { :root { --k: 1.26; } }
+@media (min-width: 2100px) and (min-height: 1300px) { :root { --k: 1.38; } }
+@media (min-width: 2400px) and (min-height: 1450px) { :root { --k: 1.54; } }
+@media (min-width: 2800px) and (min-height: 1640px) { :root { --k: 1.74; } }
+@media (min-width: 3400px) and (min-height: 1980px) { :root { --k: 2.1; } }
+@media (min-width: 1500px) {
+  :root { --maxw: calc(1240px * var(--kw)); --header-h: calc(72px * var(--k)); }
+  html { font-size: calc(16px * var(--k)); }
+  .brand img { width: calc(118px * var(--k)); }
+  /* the 3D scene keeps its frame at any aspect (logo3d.js fits the camera), so its height is capped
+     to keep the pillars on the first screen */
+  .hero-logo { aspect-ratio: auto; height: min(calc(var(--maxw) * .36), 50svh); }
+  .btn { min-height: calc(48px * var(--k)); padding: 0 calc(26px * var(--k)); }
+  .hero-desk, .desk-grid { gap: calc(12px * var(--k)) calc(56px * var(--k)); }
+  .pillar { padding: calc(32px * var(--k)) calc(28px * var(--k)) 8px 0; }
+  .pillar + .pillar { padding-left: calc(28px * var(--k)); }
+  .logo-scroll { --row: calc(52px * var(--k)); --row-gap: calc(52px * var(--k)); max-width: calc(1160px * var(--kw)); }
+  .logo-wall li { min-height: calc(52px * var(--k)); }
+  .logo { width: calc(var(--w) * var(--k)); height: calc(var(--h) * var(--k)); max-height: calc(46px * var(--k)); }
+  .portfolio { max-width: calc(1160px * var(--kw)); }
+  .groups li { width: calc(132px * var(--k)); }
+  .group-icon { width: calc(48px * var(--k)); height: calc(48px * var(--k)); }
+  .flag svg { width: calc(21px * var(--k)); height: calc(14px * var(--k)); }
+  .wh-logo { height: calc(44px * var(--k)); }
+  .wh-logo-vit { height: calc(40px * var(--k)); }
+  .mode svg, .mode-icon { width: calc(68px * var(--k)); height: calc(68px * var(--k)); }
+  .carriers .logo-wall li { min-height: calc(44px * var(--k)); }
+  .plus { width: calc(32px * var(--k)); height: calc(32px * var(--k)); }
+  .team { max-width: calc(920px * var(--kw)); gap: calc(16px * var(--k)); }
+  .person { padding: calc(26px * var(--k)); gap: calc(20px * var(--k)); }
+  .avatar { width: calc(64px * var(--k)); height: calc(64px * var(--k)); }
+  .forms .inquiry { max-width: calc(860px * var(--kw)); }
+  .chat-fab svg { width: calc(20px * var(--k)); height: calc(20px * var(--k)); }
+}
