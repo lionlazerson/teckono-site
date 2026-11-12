@@ -11,11 +11,7 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
 function webglAvailable() {
   try {
     const c = document.createElement('canvas');
-    const gl = window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl'));
-    // release the probe context right away, so the page holds only the one the scene uses
-    const lose = gl && gl.getExtension('WEBGL_lose_context');
-    if (lose) lose.loseContext();
-    return !!gl;
+    return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
   } catch (e) {
     return false;
   }
@@ -178,8 +174,13 @@ async function init() {
     ...EYES.map((e) => loadTexture(robotDir + e.file)),
   ]);
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+  // 'default' power: 'high-performance' makes dual-GPU laptops switch GPUs, which can drop the context
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'default' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  // if the GPU drops the context (driver reset, low memory), show the flat images instead of an empty
+  // frame, and bring the 3D back when the browser restores the context
+  renderer.domElement.addEventListener('webglcontextlost', (e) => { e.preventDefault(); host.classList.remove('is-3d'); });
+  renderer.domElement.addEventListener('webglcontextrestored', () => { host.classList.add('is-3d'); });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
