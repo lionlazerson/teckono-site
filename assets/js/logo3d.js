@@ -174,13 +174,8 @@ async function init() {
     ...EYES.map((e) => loadTexture(robotDir + e.file)),
   ]);
 
-  // 'default' power: 'high-performance' makes dual-GPU laptops switch GPUs, which can drop the context
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'default' });
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  // if the GPU drops the context (driver reset, low memory), show the flat images instead of an empty
-  // frame, and bring the 3D back when the browser restores the context
-  renderer.domElement.addEventListener('webglcontextlost', (e) => { e.preventDefault(); host.classList.remove('is-3d'); });
-  renderer.domElement.addEventListener('webglcontextrestored', () => { host.classList.add('is-3d'); });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
