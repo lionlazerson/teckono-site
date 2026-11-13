@@ -2,7 +2,8 @@
 // one before it while that one stays pinned, and from there the two scroll on together.
 //  1. Hero → white brands card. The hero fills the first screen, so the card starts just below the
 //     fold, and it stops a little under the hero's text and buttons. The first time it comes in, its
-//     pink-glowing edge lets out a thin, even band of white smoke, like smoke from under a door.
+//     pink-glowing edge lets out a band of white steam and keeps blowing it upward for about 3.5 s,
+//     then the steam lifts and dissolves.
 //  2. Brands → dark distribution card. It covers about a third of the brands card (an empty zone is
 //     added under the logos for it, so nothing gets hidden), and each time it comes in a sharp,
 //     bright glint runs along its top edge.
@@ -263,16 +264,60 @@
       }
     }
     flash = 0.85;
+    jetOn = true; jet = 0; jetNext = 0.08; // then keep blowing (Lion, v56)
+  }
+
+  // After the first burst the edge keeps blowing hard for JET seconds (Lion: about 3.5 s, as if
+  // the steam is pushed out from below), in quick waves of upward puffs; the blowing eases off over
+  // the last part and the steam already out lifts and dissolves as before.
+  var JET = 3.5, JET_EASE = 0.8, JET_STEP = 0.12;
+  var jetOn = false, jet = 0, jetNext = 0;
+  function jetStrength(t) {
+    if (t < 0 || t >= JET) return 0;
+    if (t > JET - JET_EASE) { var e = (JET - t) / JET_EASE; return e * e * (3 - 2 * e); }
+    return 1;
+  }
+  function blow(str) {
+    var step = (3 + 11 * unit) * 4;
+    for (var x = -24; x < cssW + 24; x += step) {
+      if (Math.random() > 0.5 + 0.5 * str) continue;
+      var sp = (480 + Math.random() * 320) * (0.6 + 0.4 * str) * unit;
+      var a = -Math.PI / 2 + (Math.random() - 0.5) * 0.5;
+      puffs.push({
+        x: x + Math.random() * step,
+        y: edgeY + 2,
+        vx: Math.cos(a) * sp + (Math.random() - 0.5) * 50 * unit,
+        vy: Math.sin(a) * sp,
+        s0: (34 + Math.random() * 34) * unit,
+        grow: (170 + Math.random() * 170) * unit,
+        life: 1.2 + Math.random() * 0.8,
+        age: -Math.random() * JET_STEP,
+        peak: (0.09 + Math.random() * 0.06) * (0.4 + 0.6 * str),
+        rot: Math.random() * Math.PI * 2,
+        vr: (Math.random() - 0.5) * 1.4,
+        img: sprites[(Math.random() * sprites.length) | 0]
+      });
+    }
   }
 
   var running = false;
   var last = 0;
 
   function frame(now) {
-    var dt = Math.min(0.05, (now - last) / 1000);
+    var dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); // rAF time can trail performance.now()
     last = now;
 
     if (seepPending) { seepPending = false; seep(); }
+    if (jetOn) {
+      jet += dt;
+      while (jet >= jetNext && jetNext < JET) {
+        var str = jetStrength(jetNext);
+        if (str > 0.02) blow(str);
+        jetNext += JET_STEP;
+      }
+      flash = Math.max(flash, 0.85 * jetStrength(jet)); // the edge glows while it blows
+      if (jet >= JET) jetOn = false;
+    }
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -307,7 +352,7 @@
     flash *= Math.exp(-1.6 * dt);
     seam.style.setProperty('--rev', flash < 0.005 ? '0' : flash.toFixed(3));
 
-    if (puffs.length || flash > 0.005) {
+    if (puffs.length || flash > 0.005 || jetOn) {
       requestAnimationFrame(frame);
     } else {
       running = false;
